@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<link rel="preconnect" href="https://www.youtube-nocookie.com" crossorigin>
 <meta name="robots" content="noindex, nofollow">
 <title>RP Revisited media</title>
 <!--
@@ -66,7 +67,10 @@
 
   if (provider === "youtube" && /^[\w-]{11}$/.test(id)) {
     window.onYouTubeIframeAPIReady = function () {
+      // YouTube's privacy-enhanced mode (no tracking cookies): an official
+      // option that also means far fewer ads in practice.
       var yt = new YT.Player("player", {
+        host: "https://www.youtube-nocookie.com",
         videoId: id,
         playerVars: { autoplay: 1, controls: 0, start: Math.floor(start), disablekb: 1, fs: 0,
           modestbranding: 1, rel: 0, iv_load_policy: 3, playsinline: 1 },
