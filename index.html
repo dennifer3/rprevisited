@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RP Revisited</title>
+  <meta name="description" content="RP Revisited: a modern Garry's Mod roleplay server, made from scratch. Jobs, elections, crafting, duels, courier runs, city events and optional VR.">
+  <meta name="theme-color" content="#09090b">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500&family=Barlow+Semi+Condensed:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="mark" href="#top" aria-label="RP Revisited, back to top">
+      <span class="mark-tag">RP</span><span class="mark-word">Revisited</span>
+    </a>
+    <nav class="nav" aria-label="Sections">
+      <a href="#features">Features</a>
+      <a href="#jobs">Jobs</a>
+      <a href="#rules">Rules</a>
+      <a href="#start">Getting started</a>
+      <a href="#join">Join</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="wrap">
+      <div class="label">Garry's Mod roleplay</div>
+      <h1>A city you <em>make your own.</em></h1>
+      <p class="lead">A new, modern roleplay experience made from scratch for this server, inspired by DarkRP. Pick a job, earn your keep, run for Mayor, or stay one step ahead of the police.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" data-join href="#join">Join the city</a>
+        <a class="btn" href="#rules">Read the rules</a>
+      </div>
+      <p class="join-note" data-join-note></p>
+
+      <div class="facts" role="list">
+        <div class="fact" role="listitem"><div class="label">Map</div><div class="value">Uptown, night</div></div>
+        <div class="fact" role="listitem"><div class="label">Players</div><div class="value">Up to 64</div></div>
+        <div class="fact" role="listitem"><div class="label">Jobs</div><div class="value">12</div></div>
+        <div class="fact" role="listitem"><div class="label">VR</div><div class="value amber">Optional, fully playable</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="block" id="features">
+    <div class="wrap">
+      <div class="rule"><h2>What's in the city</h2></div>
+      <p class="intro">Everything is built for this server, so it all fits together: one menu, one look, and systems that talk to each other.</p>
+      <div class="grid">
+        <article class="tile brackets">
+          <div class="icon">01</div>
+          <h3>Jobs and paydays</h3>
+          <p>Twelve jobs across citizens, vendors, police and crime. Every job pays on a timer, so you're never broke for long.</p>
+        </article>
+        <article class="tile brackets">
+          <div class="icon">02</div>
+          <h3>Elections and laws</h3>
+          <p>Win the vote to become Mayor, write the laws, call lockdowns, approve warrants and run a city lottery.</p>
+        </article>
+        <article class="tile brackets">
+          <div class="icon">03</div>
+          <h3>Crafting</h3>
+          <p>Dig through dumpsters for parts, build at a crafting table, or sell what you find to the Fence. No questions asked.</p>
+        </article>
+        <article class="tile brackets">
+          <div class="icon">04</div>
+          <h3>Duels</h3>
+          <p>Bet on a fair fight in the arena with the Duel Master. Same gear for both sides, winner takes the pot.</p>
+        </article>
+        <article class="tile brackets">
+          <div class="icon">05</div>
+          <h3>Courier runs</h3>
+          <p>Take a timed job from the Courier Boss and race packages to dead drops across the map before the clock runs out.</p>
+        </article>
+        <article class="tile brackets">
+          <div class="icon">06</div>
+          <h3>City events</h3>
+          <p>Some nights the city goes wrong. Survive Zombie Night with everyone else, or profit from the chaos.</p>
+        </article>
+        <article class="tile brackets">
+          <div class="icon">07</div>
+          <h3>Property</h3>
+          <p>Buy doors, lock up, title your place and hand out keys. Raids need a warrant, and the Mayor has to sign off.</p>
+        </article>
+        <article class="tile brackets">
+          <div class="icon">VR</div>
+          <h3>Optional VR</h3>
+          <p>Jump in with a headset whenever you like: real hands, two-handed guns, wrist displays. Desktop players play alongside.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Jobs -->
+  <section class="block" id="jobs">
+    <div class="wrap">
+      <div class="rule"><h2>Jobs</h2><span class="count">12</span></div>
+      <p class="intro">Press F4 in game to switch. Some jobs have limited slots, and the Mayor is elected.</p>
+      <div class="jobs">
+        <div class="job-group">
+          <h3 class="label">Citizens</h3>
+          <div class="job"><div class="swatch" style="--c:#2fae2f"></div><div><div class="name">Citizen</div><div class="desc">A regular person trying to make it in the city. Find a place to live and figure out how to earn your keep.</div></div></div>
+          <div class="job"><div class="swatch" style="--c:#9a6a2a"></div><div><div class="name">Hobo</div><div class="desc">Nothing but the clothes on your back. Ask for spare change and keep your head above water.</div></div></div>
+          <div class="job"><div class="swatch" style="--c:#5f9a9a"></div><div><div class="name">Medic</div><div class="desc">People get hurt, and you're the one they call. Patch them up and set your own prices.</div></div></div>
+        </div>
+        <div class="job-group">
+          <h3 class="label">Civil Protection</h3>
+          <div class="job"><div class="swatch" style="--c:#3a4fd6"></div><div><div class="name">Police Officer</div><div class="desc">Keep the peace, answer 911 calls and bring wanted suspects in with your arrest baton.</div></div></div>
+          <div class="job"><div class="swatch" style="--c:#4a5cff"></div><div><div class="name">Police Chief</div><div class="desc">Run the department, lead the bigger raids and make the calls when things get serious.</div></div></div>
+          <div class="job"><div class="swatch" style="--c:#c53030"></div><div><div class="name">Mayor</div><div class="desc">The city is yours to run. Write the laws and keep the people happy, or they'll vote you out.</div></div></div>
+        </div>
+        <div class="job-group">
+          <h3 class="label">Vendors</h3>
+          <div class="job"><div class="swatch" style="--c:#ff8c00"></div><div><div class="name">Gun Dealer</div><div class="desc">Keep the city armed. Order crates, open shop and be careful who you sell to.</div></div></div>
+          <div class="job"><div class="swatch" style="--c:#b8875a"></div><div><div class="name">Contraband Dealer</div><div class="desc">Sell the things nobody's supposed to have. Keep your stock hidden and your eyes open.</div></div></div>
+        </div>
+        <div class="job-group">
+          <h3 class="label">Criminals</h3>
+          <div class="job"><div class="swatch" style="--c:#8a8a8a"></div><div><div class="name">Gangster</div><div class="desc">Part of the crew. Do what the Mob Boss asks and stay a step ahead of the cops.</div></div></div>
+          <div class="job"><div class="swatch" style="--c:#cfcfcf"></div><div><div class="name">Mob Boss</div><div class="desc">Call the shots for the gang, keep your crew loyal and make sure nothing leads back to you.</div></div></div>
+          <div class="job"><div class="swatch" style="--c:#9a80c4"></div><div><div class="name">Thief</div><div class="desc">Locked doors are just a suggestion. Get in, grab what you can carry, don't get caught.</div></div></div>
+          <div class="job"><div class="swatch" style="--c:#87cefa"></div><div><div class="name">Hacker</div><div class="desc">Bypass keypads and security systems for the right price, with a keypad cracker in your pocket.</div></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Rules -->
+  <section class="block" id="rules">
+    <div class="wrap">
+      <div class="rule"><h2>Rules</h2><span class="count">9</span></div>
+      <p class="intro">Short and simple. Staff have the final say.</p>
+      <ol class="rules">
+        <li>Don't kill people for no reason. Have a roleplay reason, and give them a chance to react.</li>
+        <li>If you die, forget that fight. Don't run straight back for revenge.</li>
+        <li>No killing, robbing or raiding in spawn.</li>
+        <li>Don't block, trap or push people around with props.</li>
+        <li>Play your job. Police don't raid for fun, and medics don't rob banks.</li>
+        <li>No cheats, exploits or scripts. Found a bug? Report it instead of using it.</li>
+        <li>No hate speech or harassment. Keep it friendly.</li>
+        <li>No spamming chat or the mic.</li>
+        <li>Staff have the final say. If you disagree, talk it out calmly.</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- Getting started -->
+  <section class="block" id="start">
+    <div class="wrap">
+      <div class="rule"><h2>Getting started</h2></div>
+      <p class="intro">You'll be fine. Most people will talk back if you talk to them.</p>
+      <div class="steps">
+        <article class="step brackets">
+          <span class="key">F4</span>
+          <h3>Pick a job</h3>
+          <p>F4 opens pretty much everything: jobs, the shop, chat speech and more. Every job pays, so pick one and go.</p>
+        </article>
+        <article class="step brackets">
+          <span class="key">E</span>
+          <h3>Dig around</h3>
+          <p>Press E on a dumpster. You might find health, ammo or crafting parts worth real money to the right person.</p>
+        </article>
+        <article class="step brackets">
+          <span class="key">/</span>
+          <h3>Ask the city</h3>
+          <p>Read /laws before you get arrested, /help lists every command, and the Welcome NPC in spawn can point you around.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Leaderboards (MySQL web stats) -->
+  <section class="block" id="stats">
+    <div class="wrap">
+      <div class="rule"><h2>Leaderboards</h2></div>
+      <div class="soon">
+        <div class="label">Coming soon</div>
+        <h3>Top players, playtime and duels</h3>
+        <p>Live stats from the server are on the way: who's online, the most played, the best duelists and the richest wallets in the city.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Join -->
+  <section class="block" id="join">
+    <div class="wrap join">
+      <div>
+        <div class="label">See you in the city</div>
+        <h2>Come play.</h2>
+        <p>It's a work in progress and we're still small, so things will change and bugs get fixed fast. Found one? Tell staff in game.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" data-join href="#join">Join the city</a>
+          <a class="btn is-off" data-discord href="#join">Discord coming soon</a>
+        </div>
+        <p class="join-note" data-join-note></p>
+      </div>
+      <div class="panel">
+        <div class="panel-row"><span class="label">Game</span><span class="v">Garry's Mod</span></div>
+        <div class="panel-row"><span class="label">Mode</span><span class="v">RP Revisited</span></div>
+        <div class="panel-row"><span class="label">Map</span><span class="v">rp_uptown_v4_b12_night</span></div>
+        <div class="panel-row"><span class="label">Slots</span><span class="v">64</span></div>
+        <div class="panel-row"><span class="label">VR</span><span class="v">Optional</span></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <a class="mark" href="#top"><span class="mark-tag">RP</span><span class="mark-word">Revisited</span></a>
+    <span>&copy; <span data-year></span> RP Revisited. Made by Dennifer. Not affiliated with Facepunch or DarkRP.</span>
+  </div>
+</footer>
+
+<script src="site.js"></script>
+</body>
+</html>
