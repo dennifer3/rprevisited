@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>RP Revisited: loading</title>
+<!--
+  Garry's Mod loading screen for RP Revisited.
+  Set on the server (cfg/server.cfg):
+    sv_loadingurl "https://dennifer3.github.io/rprevisited/loading/?map=%m"
+  Gmod calls GameDetails, SetFilesTotal, SetFilesNeeded, DownloadingFile and
+  SetStatusChanged below while you join. Open with ?demo to watch it fake a join.
+  Plain ES5 and prefixed CSS on purpose: older Gmod builds use an old browser.
+  The spiral is a stand-in until there's a real logo.
+-->
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; }
+  body {
+    background: #09090b;
+    color: #eee9e0;
+    font-family: "Bahnschrift", "Segoe UI", Tahoma, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -webkit-user-select: none; user-select: none;
+    cursor: default;
+  }
+  .caps { text-transform: uppercase; letter-spacing: 0.12em; }
+  .faint { color: #706c66; }
+  .dim { color: #a59f96; }
+
+  /* A faint vignette so the middle reads as lit */
+  .vignette {
+    position: fixed; left: 0; top: 0; right: 0; bottom: 0; pointer-events: none;
+    background: radial-gradient(ellipse at center, rgba(255,178,62,0.06) 0%, rgba(0,0,0,0) 45%, rgba(0,0,0,0.55) 100%);
+  }
+
+  /* Corner frame, like the game's selection brackets */
+  .corner { position: fixed; width: 26px; height: 26px; border-color: rgba(255,178,62,0.55); border-style: solid; border-width: 0; }
+  .c-tl { left: 28px; top: 28px; border-left-width: 2px; border-top-width: 2px; }
+  .c-tr { right: 28px; top: 28px; border-right-width: 2px; border-top-width: 2px; }
+  .c-bl { left: 28px; bottom: 28px; border-left-width: 2px; border-bottom-width: 2px; }
+  .c-br { right: 28px; bottom: 28px; border-right-width: 2px; border-bottom-width: 2px; }
+
+  .top { position: fixed; left: 72px; right: 72px; top: 40px; font-size: 13px; font-weight: 600; }
+  .top .right { float: right; }
+
+  /* The centre: spiral, then the mark */
+  .center {
+    position: fixed; left: 50%; top: 44%;
+    width: 520px; margin-left: -260px;
+    -webkit-transform: translateY(-50%); transform: translateY(-50%);
+    text-align: center;
+  }
+  .logo { width: 220px; height: 220px; margin: 0 auto; position: relative; }
+  .logo svg { width: 220px; height: 220px; display: block; overflow: visible; }
+  .spin { -webkit-transform-origin: 100px 100px; transform-origin: 100px 100px;
+    -webkit-animation: spin 14s linear infinite; animation: spin 14s linear infinite; }
+  .spin-back { -webkit-transform-origin: 100px 100px; transform-origin: 100px 100px;
+    -webkit-animation: spin 40s linear infinite reverse; animation: spin 40s linear infinite reverse; }
+  .trail { fill: none; stroke: rgba(255,178,62,0.12); stroke-width: 2; }
+  .draw {
+    fill: none; stroke: #ffb23e; stroke-width: 3; stroke-linecap: round;
+    stroke-dasharray: 990; stroke-dashoffset: 990;
+    -webkit-animation: draw 5.2s ease-in-out infinite; animation: draw 5.2s ease-in-out infinite;
+  }
+  .ring { fill: none; stroke: rgba(255,255,255,0.08); stroke-width: 1; }
+  .ticks { fill: none; stroke: rgba(255,178,62,0.5); stroke-width: 2; stroke-dasharray: 2 13.7; }
+  .core { fill: #ffb23e; -webkit-transform-origin: 100px 100px; transform-origin: 100px 100px;
+    -webkit-animation: pulse 2.6s ease-in-out infinite; animation: pulse 2.6s ease-in-out infinite; }
+  .halo { fill: rgba(255,178,62,0.18); -webkit-transform-origin: 100px 100px; transform-origin: 100px 100px;
+    -webkit-animation: halo 2.6s ease-out infinite; animation: halo 2.6s ease-out infinite; }
+
+  @-webkit-keyframes spin { from { -webkit-transform: rotate(0deg); } to { -webkit-transform: rotate(360deg); } }
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  @-webkit-keyframes draw { 0% { stroke-dashoffset: 990; } 50% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: -990; } }
+  @keyframes draw { 0% { stroke-dashoffset: 990; } 50% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: -990; } }
+  @-webkit-keyframes pulse { 0%, 100% { -webkit-transform: scale(1); } 50% { -webkit-transform: scale(1.35); } }
+  @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.35); } }
+  @-webkit-keyframes halo { 0% { -webkit-transform: scale(0.6); opacity: 0.9; } 100% { -webkit-transform: scale(3.4); opacity: 0; } }
+  @keyframes halo { 0% { transform: scale(0.6); opacity: 0.9; } 100% { transform: scale(3.4); opacity: 0; } }
+
+  .mark { margin-top: 34px; display: inline-block; }
+  .mark-tag { display: inline-block; background: #ffb23e; color: #120e08; font-weight: 700; font-size: 15px; padding: 5px 7px; margin-right: 10px; vertical-align: middle; }
+  .mark-word { display: inline-block; font-weight: 700; font-size: 26px; vertical-align: middle; letter-spacing: 0.04em; }
+  .server { margin-top: 12px; font-size: 14px; min-height: 18px; }
+
+  /* Bottom: status, progress, tips */
+  .bottom { position: fixed; left: 72px; right: 72px; bottom: 56px; }
+  .status-row { overflow: hidden; font-size: 14px; font-weight: 600; margin-bottom: 10px; }
+  .status { float: left; }
+  .count { float: right; }
+  .bar { position: relative; height: 6px; background: rgba(255,255,255,0.07); overflow: hidden; }
+  .fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: #ffb23e;
+    -webkit-transition: width 0.4s ease; transition: width 0.4s ease; }
+  .bar.waiting .fill { width: 22%; -webkit-animation: sweep 1.6s ease-in-out infinite; animation: sweep 1.6s ease-in-out infinite; }
+  @-webkit-keyframes sweep { 0% { left: -22%; } 100% { left: 100%; } }
+  @keyframes sweep { 0% { left: -22%; } 100% { left: 100%; } }
+  .tickmarks { position: absolute; left: 0; top: 0; right: 0; bottom: 0;
+    background-image: -webkit-linear-gradient(left, rgba(9,9,11,0.9) 2px, transparent 2px);
+    background-image: linear-gradient(to right, rgba(9,9,11,0.9) 2px, transparent 2px);
+    background-size: 10% 100%; }
+  .file { margin-top: 10px; font-size: 13px; height: 16px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+
+  .tip { margin-top: 28px; font-size: 15px; min-height: 22px;
+    -webkit-transition: opacity 0.5s ease; transition: opacity 0.5s ease; }
+  .tip b { color: #ffb23e; font-weight: 700; margin-right: 10px; font-size: 13px; letter-spacing: 0.12em; }
+
+  @media (max-width: 700px) {
+    .top, .bottom { left: 24px; right: 24px; }
+    .center { width: 300px; margin-left: -150px; }
+    .corner { display: none; }
+  }
+</style>
+</head>
+<body>
+  <div class="vignette"></div>
+  <div class="corner c-tl"></div><div class="corner c-tr"></div>
+  <div class="corner c-bl"></div><div class="corner c-br"></div>
+
+  <div class="top caps faint">
+    <span>Joining the city</span>
+    <span class="right" id="map">rp_uptown</span>
+  </div>
+
+  <div class="center">
+    <div class="logo">
+      <svg viewBox="0 0 200 200" aria-hidden="true">
+        <circle class="ring" cx="100" cy="100" r="98"></circle>
+        <g class="spin-back"><circle class="ticks" cx="100" cy="100" r="98"></circle></g>
+        <g class="spin">
+          <path class="trail" d="M104.0 100.0 L104.3 100.3 L104.6 100.7 L104.9 101.2 L105.1 101.7 L105.3 102.2 L105.4 102.7 L105.4 103.3 L105.4 103.9 L105.4 104.6 L105.2 105.2 L105.0 105.9 L104.7 106.5 L104.4 107.2 L104.0 107.8 L103.5 108.4 L102.9 109.0 L102.3 109.5 L101.6 110.0 L100.8 110.4 L100.0 110.8 L99.1 111.1 L98.2 111.3 L97.2 111.5 L96.3 111.5 L95.2 111.5 L94.2 111.4 L93.1 111.2 L92.1 110.9 L91.0 110.5 L90.0 110.0 L89.0 109.4 L88.0 108.7 L87.1 107.9 L86.2 107.0 L85.4 106.1 L84.6 105.0 L83.9 103.9 L83.3 102.6 L82.9 101.3 L82.5 100.0 L82.2 98.6 L82.0 97.2 L82.0 95.7 L82.0 94.2 L82.2 92.6 L82.6 91.1 L83.0 89.6 L83.6 88.1 L84.3 86.6 L85.2 85.2 L86.2 83.8 L87.3 82.5 L88.5 81.3 L89.9 80.2 L91.3 79.1 L92.9 78.2 L94.6 77.4 L96.3 76.7 L98.1 76.1 L100.0 75.7 L101.9 75.4 L103.9 75.3 L105.9 75.4 L107.9 75.6 L109.9 76.0 L112.0 76.5 L113.9 77.3 L115.9 78.1 L117.8 79.2 L119.6 80.4 L121.3 81.8 L123.0 83.3 L124.5 85.0 L125.9 86.8 L127.1 88.8 L128.3 90.8 L129.2 93.0 L130.0 95.2 L130.6 97.6 L131.1 100.0 L131.3 102.5 L131.4 105.0 L131.2 107.5 L130.8 110.0 L130.3 112.5 L129.5 115.0 L128.5 117.5 L127.3 119.9 L125.9 122.2 L124.4 124.4 L122.6 126.5 L120.7 128.4 L118.5 130.2 L116.3 131.9 L113.8 133.4 L111.3 134.7 L108.6 135.8 L105.8 136.7 L102.9 137.4 L100.0 137.8 L97.0 138.1 L94.0 138.0 L90.9 137.8 L87.9 137.3 L84.9 136.5 L81.9 135.5 L79.0 134.3 L76.2 132.8 L73.4 131.1 L70.8 129.2 L68.4 127.0 L66.1 124.6 L64.0 122.1 L62.1 119.3 L60.3 116.4 L58.9 113.4 L57.6 110.2 L56.6 106.9 L55.9 103.5 L55.4 100.0 L55.2 96.5 L55.3 92.9 L55.6 89.3 L56.3 85.8 L57.2 82.3 L58.4 78.8 L59.9 75.5 L61.7 72.2 L63.8 69.0 L66.1 66.1 L68.6 63.2 L71.4 60.6 L74.4 58.2 L77.6 56.0 L81.0 54.1 L84.5 52.4 L88.2 51.0 L92.1 49.9 L96.0 49.1 L100.0 48.6 L104.1 48.4 L108.1 48.6 L112.2 49.0 L116.3 49.8 L120.3 51.0 L124.3 52.4 L128.1 54.2 L131.8 56.2 L135.3 58.6 L138.7 61.3 L141.9 64.2 L144.9 67.4 L147.6 70.9 L150.0 74.5 L152.2 78.4 L154.0 82.4 L155.6 86.7 L156.8 91.0 L157.6 95.5 L158.2 100.0 L158.3 104.6 L158.1 109.2 L157.5 113.8 L156.6 118.4 L155.3 122.9 L153.6 127.3 L151.6 131.6 L149.2 135.8 L146.5 139.7 L143.5 143.5 L140.2 147.1 L136.6 150.3 L132.7 153.3 L128.6 156.0 L124.2 158.4 L119.6 160.5 L114.9 162.1 L110.1 163.5 L105.1 164.4 L100.0 164.9 L94.9 165.1 L89.7 164.8 L84.6 164.1 L79.5 163.0 L74.5 161.5 L69.6 159.7 L64.8 157.4 L60.2 154.7 L55.9 151.7 L51.7 148.3 L47.8 144.6 L44.2 140.5 L40.9 136.2 L37.9 131.6 L35.3 126.8 L33.1 121.7 L31.3 116.5 L29.9 111.1 L28.9 105.6 L28.3 100.0 L28.2 94.3 L28.5 88.7 L29.3 83.0 L30.5 77.4 L32.2 71.9 L34.3 66.5 L36.9 61.3 L39.8 56.3 L43.2 51.5 L46.9 46.9 L51.0 42.7 L55.5 38.7 L60.2 35.1 L65.3 31.9 L70.6 29.1 L76.2 26.7 L81.9 24.7 L87.8 23.2 L93.9 22.1 L100.0 21.5 L106.2 21.4 L112.4 21.8 L118.6 22.7 L124.7 24.1 L130.7 25.9 L136.5 28.3 L142.2 31.1 L147.7 34.3 L152.9 38.0 L157.9 42.1 L162.5 46.6 L166.8 51.5 L170.7 56.7 L174.1 62.2 L177.2 68.0 L179.8 74.1 L181.9 80.3 L183.5 86.8 L184.6 93.3 L185.2 100.0 L185.3 106.7 L184.9 113.4 L183.9 120.1 L182.3 126.8 L180.3 133.3 L177.8 139.6 L174.7 145.8 L171.1 151.7 L167.1 157.3 L162.7 162.7 L157.8 167.6 L152.5 172.2 L146.8 176.4 L140.8 180.2 L134.6 183.4 L128.0 186.2 L121.2 188.5 L114.3 190.2 L107.2 191.4 L100.0 192.0"></path>
+          <path class="draw" d="M104.0 100.0 L104.3 100.3 L104.6 100.7 L104.9 101.2 L105.1 101.7 L105.3 102.2 L105.4 102.7 L105.4 103.3 L105.4 103.9 L105.4 104.6 L105.2 105.2 L105.0 105.9 L104.7 106.5 L104.4 107.2 L104.0 107.8 L103.5 108.4 L102.9 109.0 L102.3 109.5 L101.6 110.0 L100.8 110.4 L100.0 110.8 L99.1 111.1 L98.2 111.3 L97.2 111.5 L96.3 111.5 L95.2 111.5 L94.2 111.4 L93.1 111.2 L92.1 110.9 L91.0 110.5 L90.0 110.0 L89.0 109.4 L88.0 108.7 L87.1 107.9 L86.2 107.0 L85.4 106.1 L84.6 105.0 L83.9 103.9 L83.3 102.6 L82.9 101.3 L82.5 100.0 L82.2 98.6 L82.0 97.2 L82.0 95.7 L82.0 94.2 L82.2 92.6 L82.6 91.1 L83.0 89.6 L83.6 88.1 L84.3 86.6 L85.2 85.2 L86.2 83.8 L87.3 82.5 L88.5 81.3 L89.9 80.2 L91.3 79.1 L92.9 78.2 L94.6 77.4 L96.3 76.7 L98.1 76.1 L100.0 75.7 L101.9 75.4 L103.9 75.3 L105.9 75.4 L107.9 75.6 L109.9 76.0 L112.0 76.5 L113.9 77.3 L115.9 78.1 L117.8 79.2 L119.6 80.4 L121.3 81.8 L123.0 83.3 L124.5 85.0 L125.9 86.8 L127.1 88.8 L128.3 90.8 L129.2 93.0 L130.0 95.2 L130.6 97.6 L131.1 100.0 L131.3 102.5 L131.4 105.0 L131.2 107.5 L130.8 110.0 L130.3 112.5 L129.5 115.0 L128.5 117.5 L127.3 119.9 L125.9 122.2 L124.4 124.4 L122.6 126.5 L120.7 128.4 L118.5 130.2 L116.3 131.9 L113.8 133.4 L111.3 134.7 L108.6 135.8 L105.8 136.7 L102.9 137.4 L100.0 137.8 L97.0 138.1 L94.0 138.0 L90.9 137.8 L87.9 137.3 L84.9 136.5 L81.9 135.5 L79.0 134.3 L76.2 132.8 L73.4 131.1 L70.8 129.2 L68.4 127.0 L66.1 124.6 L64.0 122.1 L62.1 119.3 L60.3 116.4 L58.9 113.4 L57.6 110.2 L56.6 106.9 L55.9 103.5 L55.4 100.0 L55.2 96.5 L55.3 92.9 L55.6 89.3 L56.3 85.8 L57.2 82.3 L58.4 78.8 L59.9 75.5 L61.7 72.2 L63.8 69.0 L66.1 66.1 L68.6 63.2 L71.4 60.6 L74.4 58.2 L77.6 56.0 L81.0 54.1 L84.5 52.4 L88.2 51.0 L92.1 49.9 L96.0 49.1 L100.0 48.6 L104.1 48.4 L108.1 48.6 L112.2 49.0 L116.3 49.8 L120.3 51.0 L124.3 52.4 L128.1 54.2 L131.8 56.2 L135.3 58.6 L138.7 61.3 L141.9 64.2 L144.9 67.4 L147.6 70.9 L150.0 74.5 L152.2 78.4 L154.0 82.4 L155.6 86.7 L156.8 91.0 L157.6 95.5 L158.2 100.0 L158.3 104.6 L158.1 109.2 L157.5 113.8 L156.6 118.4 L155.3 122.9 L153.6 127.3 L151.6 131.6 L149.2 135.8 L146.5 139.7 L143.5 143.5 L140.2 147.1 L136.6 150.3 L132.7 153.3 L128.6 156.0 L124.2 158.4 L119.6 160.5 L114.9 162.1 L110.1 163.5 L105.1 164.4 L100.0 164.9 L94.9 165.1 L89.7 164.8 L84.6 164.1 L79.5 163.0 L74.5 161.5 L69.6 159.7 L64.8 157.4 L60.2 154.7 L55.9 151.7 L51.7 148.3 L47.8 144.6 L44.2 140.5 L40.9 136.2 L37.9 131.6 L35.3 126.8 L33.1 121.7 L31.3 116.5 L29.9 111.1 L28.9 105.6 L28.3 100.0 L28.2 94.3 L28.5 88.7 L29.3 83.0 L30.5 77.4 L32.2 71.9 L34.3 66.5 L36.9 61.3 L39.8 56.3 L43.2 51.5 L46.9 46.9 L51.0 42.7 L55.5 38.7 L60.2 35.1 L65.3 31.9 L70.6 29.1 L76.2 26.7 L81.9 24.7 L87.8 23.2 L93.9 22.1 L100.0 21.5 L106.2 21.4 L112.4 21.8 L118.6 22.7 L124.7 24.1 L130.7 25.9 L136.5 28.3 L142.2 31.1 L147.7 34.3 L152.9 38.0 L157.9 42.1 L162.5 46.6 L166.8 51.5 L170.7 56.7 L174.1 62.2 L177.2 68.0 L179.8 74.1 L181.9 80.3 L183.5 86.8 L184.6 93.3 L185.2 100.0 L185.3 106.7 L184.9 113.4 L183.9 120.1 L182.3 126.8 L180.3 133.3 L177.8 139.6 L174.7 145.8 L171.1 151.7 L167.1 157.3 L162.7 162.7 L157.8 167.6 L152.5 172.2 L146.8 176.4 L140.8 180.2 L134.6 183.4 L128.0 186.2 L121.2 188.5 L114.3 190.2 L107.2 191.4 L100.0 192.0"></path>
+        </g>
+        <circle class="halo" cx="100" cy="100" r="6"></circle>
+        <circle class="core" cx="100" cy="100" r="5"></circle>
+      </svg>
+    </div>
+    <div class="mark"><span class="mark-tag">RP</span><span class="mark-word caps">Revisited</span></div>
+    <div class="server dim" id="server"></div>
+  </div>
+
+  <div class="bottom">
+    <div class="status-row caps">
+      <span class="status" id="status">Connecting</span>
+      <span class="count faint" id="count"></span>
+    </div>
+    <div class="bar waiting" id="bar"><div class="fill" id="fill"></div><div class="tickmarks"></div></div>
+    <div class="file faint" id="file"></div>
+    <div class="tip dim" id="tip"></div>
+  </div>
+
+<script>
+(function () {
+  var TIPS = [
+    "Press F4 for jobs, the shop and pretty much everything else.",
+    "Every job pays on a timer. Pick one and you won't be broke for long.",
+    "Press E on a dumpster. You might find health, ammo or crafting parts.",
+    "Read /laws before you get yourself arrested.",
+    "The Fence buys crafting parts. No questions asked.",
+    "Win the election and you write the laws. Try not to die in office.",
+    "Bet on a fair fight with the Duel Master. Same gear for both sides.",
+    "The Courier Boss pays for packages delivered on time.",
+    "No killing, robbing or raiding in spawn.",
+    "Got a headset? VR is optional, and fully playable."
+  ];
+
+  function $(id) { return document.getElementById(id); }
+  function setText(id, text) { $(id).innerHTML = ""; $(id).appendChild(document.createTextNode(text)); }
+
+  var total = 0, needed = 0;
+
+  function updateBar() {
+    if (total > 0) {
+      var done = Math.max(0, total - needed);
+      $("bar").className = "bar";
+      $("fill").style.width = Math.min(100, done / total * 100) + "%";
+      setText("count", done + " / " + total + " files");
+    }
+  }
+
+  // Called by Garry's Mod while joining.
+  window.GameDetails = function (servername, serverurl, mapname, maxplayers, steamid, gamemode) {
+    if (servername) setText("server", servername);
+    if (mapname) setText("map", mapname + (maxplayers ? "   /   " + maxplayers + " slots" : ""));
+  };
+  window.SetFilesTotal = function (n) { total = Number(n) || 0; updateBar(); };
+  window.SetFilesNeeded = function (n) { needed = Number(n) || 0; updateBar(); };
+  window.DownloadingFile = function (name) {
+    var parts = String(name || "").split("/");
+    setText("file", "Downloading " + parts[parts.length - 1]);
+  };
+  window.SetStatusChanged = function (status) {
+    setText("status", String(status || "").replace(/\.\.\.$/, ""));
+    if (/sending client info|client info sent|starting lua/i.test(status)) {
+      $("bar").className = "bar";
+      $("fill").style.width = "100%";
+      setText("file", "");
+    }
+  };
+
+  // The map from the URL (sv_loadingurl ...?map=%m), before Gmod tells us.
+  var m = /[?&]map=([^&]+)/.exec(location.search);
+  if (m) setText("map", decodeURIComponent(m[1]));
+
+  // Tips, one at a time, fading between them.
+  var tipIndex = Math.floor(Math.random() * TIPS.length);
+  function showTip() {
+    var el = $("tip");
+    el.style.opacity = 0;
+    setTimeout(function () {
+      el.innerHTML = "<b>TIP</b>";
+      el.appendChild(document.createTextNode(TIPS[tipIndex]));
+      el.style.opacity = 1;
+      tipIndex = (tipIndex + 1) % TIPS.length;
+    }, 500);
+  }
+  showTip();
+  setInterval(showTip, 7000);
+
+  // ?demo: pretend to join, for previewing in a normal browser.
+  if (/[?&]demo/.test(location.search)) {
+    GameDetails("RP Revisited | *New* Optional VR-RP | Crafting | Dueling", "", "rp_uptown_v4_b12_night", 64, "", "rprevisited");
+    SetStatusChanged("Retrieving server info...");
+    var files = ["materials/rpr/logo.png", "models/props/crate.mdl", "sound/rpr/coin.wav", "maps/rp_uptown_v4_b12_night.bsp", "lua/autorun/client/rpr.lua"];
+    var t = 60, left = 60;
+    setTimeout(function () {
+      SetStatusChanged("Workshop Complete");
+      SetFilesTotal(t); SetFilesNeeded(left);
+      var timer = setInterval(function () {
+        left = Math.max(0, left - 3);
+        SetFilesNeeded(left);
+        DownloadingFile(files[left % files.length]);
+        if (left === 0) {
+          clearInterval(timer);
+          SetStatusChanged("Sending client info...");
+          setTimeout(function () { location.reload(); }, 6000);
+        }
+      }, 450);
+    }, 2500);
+  }
+})();
+</script>
+</body>
+</html>
